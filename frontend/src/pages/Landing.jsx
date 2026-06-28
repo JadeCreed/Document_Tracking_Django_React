@@ -1,14 +1,22 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  ArrowRightLeftIcon,
+  BarChart3Icon,
+  ClipboardListIcon,
+  ScanLineIcon,
+  ShieldCheckIcon,
+  BellIcon,
+} from '../components/Icons';
 
 const FEATURES = [
-  { icon: '⬚', title: 'QR Code Verification' },
-  { icon: '⇄', title: 'Controlled Return/Receive' },
-  { icon: '🔔', title: 'Missing Document Alerts' },
-  { icon: '📊', title: 'Real-Time Heatmap' },
-  { icon: '🛡', title: 'Role-Based Access' },
-  { icon: '🗒', title: 'Audit Trail Logs' },
+  { icon: ScanLineIcon, title: 'QR Code Verification' },
+  { icon: ArrowRightLeftIcon, title: 'Controlled Return/Receive' },
+  { icon: BellIcon, title: 'Missing Document Alerts' },
+  { icon: BarChart3Icon, title: 'Real-Time Heatmap' },
+  { icon: ShieldCheckIcon, title: 'Role-Based Access' },
+  { icon: ClipboardListIcon, title: 'Audit Trail Logs' },
 ];
 
 export default function Landing() {
@@ -62,7 +70,7 @@ export default function Landing() {
           {/* INTRO — second on mobile (scroll down), left column on desktop */}
           <div className="order-2 lg:order-1">
             <span className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5">
-              🛡 Official Municipal Platform
+              <ShieldCheckIcon className="w-4 h-4" /> Official Municipal Platform
             </span>
 
             <h1 className="mt-7 text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
@@ -79,7 +87,9 @@ export default function Landing() {
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-4">
               {FEATURES.map((f) => (
                 <div key={f.title} className="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-3 shadow-sm">
-                  <span className="text-blue-600 text-xl">{f.icon}</span>
+                  <span className="text-blue-600">
+                    <f.icon className="w-5 h-5" />
+                  </span>
                   <span className="text-sm font-medium text-slate-700 leading-snug">{f.title}</span>
                 </div>
               ))}

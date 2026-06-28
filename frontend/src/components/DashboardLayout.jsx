@@ -1,28 +1,45 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import {
+  BarChart3Icon,
+  BellIcon,
+  ChevronDownIcon,
+  Clock3Icon,
+  FileTextIcon,
+  HomeIcon,
+  LayoutGridIcon,
+  LogOutIcon,
+  MenuIcon,
+  ScanLineIcon,
+  SettingsIcon,
+  UserCircleIcon,
+  UsersIcon,
+} from './Icons';
 
 const MENUS = {
   admin: [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: '▢' },
-    { label: 'Document Request', path: '/admin/document-request', icon: '⬚' },
+    { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutGridIcon },
+    { label: 'Heatmap', path: '/admin/heatmap', icon: BarChart3Icon },
+    { label: 'Document Request', path: '/admin/document-request', icon: FileTextIcon },
     {
-      label: 'User Management', icon: '👤',
+      label: 'User Management', icon: UsersIcon,
       children: [
         { label: 'Users', path: '/admin/users' },
         { label: 'Officials', path: '/admin/officials' },
         { label: 'Archive', path: '/admin/archive' },
       ],
     },
-    { label: 'QR Code Scan', path: '/admin/qr-scan', icon: '⬛' },
+    { label: 'QR Code Scan', path: '/admin/qr-scan', icon: ScanLineIcon },
   ],
   employee: [
-    { label: 'Dashboard', path: '/employee/dashboard', icon: '▢' },
-    { label: 'QR Code Scan', path: '/employee/qr-scan', icon: '⬛' },
+    { label: 'Dashboard', path: '/employee/dashboard', icon: LayoutGridIcon },
+    { label: 'Documents', path: '/employee/documents', icon: FileTextIcon },
+    { label: 'QR Code Scan', path: '/employee/qr-scan', icon: ScanLineIcon },
   ],
   citizen: [
-    { label: 'Home', path: '/citizen/home', icon: '⌂' },
-    { label: 'History', path: '/citizen/history', icon: '🕘' },
+    { label: 'Home', path: '/citizen/home', icon: HomeIcon },
+    { label: 'History', path: '/citizen/history', icon: Clock3Icon },
   ],
 };
 
@@ -77,10 +94,12 @@ export default function DashboardLayout() {
                   className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="text-base">{item.icon}</span>
+                    <item.icon className="w-4 h-4" />
                     {item.label}
                   </span>
-                  <span className={`text-xs transition-transform ${openSubmenu === item.label ? 'rotate-180' : ''}`}>▾</span>
+                  <span className={`text-xs transition-transform ${openSubmenu === item.label ? 'rotate-180' : ''}`}>
+                    <ChevronDownIcon className="w-4 h-4" />
+                  </span>
                 </button>
                 {openSubmenu === item.label && (
                   <div className="ml-9 mt-1 space-y-1">
@@ -108,7 +127,7 @@ export default function DashboardLayout() {
                   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`
                 }
               >
-                <span className="text-base">{item.icon}</span>
+                <item.icon className="w-4 h-4" />
                 {item.label}
               </NavLink>
             )
@@ -121,14 +140,14 @@ export default function DashboardLayout() {
 
         {/* TOPBAR */}
         <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-10">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-500 text-2xl">
-            ☰
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-500 hover:text-slate-700">
+            <MenuIcon className="w-6 h-6" />
           </button>
           <div className="hidden lg:block" />
 
           <div className="flex items-center gap-5">
-            <button className="relative text-slate-500 text-xl hover:text-slate-700">
-              🔔
+            <button className="relative text-slate-500 hover:text-slate-700">
+              <BellIcon className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500" />
             </button>
 
@@ -156,20 +175,20 @@ export default function DashboardLayout() {
                     onClick={() => setProfileOpen(false)}
                     className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
                     >
-                    <span>👤</span> Profile
+                    <UserCircleIcon className="w-4 h-4" /> Profile
                     </button>
                     <button
                     onClick={() => setProfileOpen(false)}
                     className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50"
                     >
-                    <span>⚙️</span> Settings
+                    <SettingsIcon className="w-4 h-4" /> Settings
                     </button>
                     <div className="border-t border-slate-100 mt-1">
                     <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
                     >
-                        <span>↗</span> Sign out
+                        <LogOutIcon className="w-4 h-4" /> Sign out
                     </button>
                     </div>
                 </div>

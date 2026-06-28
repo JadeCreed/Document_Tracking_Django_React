@@ -72,4 +72,37 @@ export const updateUser = (userId, data) => {
 };
 
 
+// --- Document API calls ---
+
+export const fetchDocuments = (statusFilter = '', page = 1) => {
+  const params = new URLSearchParams({ page });
+  if (statusFilter) params.append('status', statusFilter);
+  return api.get(`/documents/?${params.toString()}`);
+};
+
+export const fetchDocumentDetail = (id) => {
+  return api.get(`/documents/${id}/`);
+};
+
+export const createDocument = (data) => {
+  return api.post('/documents/', data);
+};
+
+export const transitionDocument = (id, data) => {
+  return api.patch(`/documents/${id}/scan/`, data); 
+};
+
+export const lookupDocumentByTracking = (trackingNumber) => {
+  return api.get(`/documents/track/${trackingNumber}/`);
+};
+
+
+export const fetchDashboardStats = () => api.get('/documents/dashboard-stats/');
+export const fetchHeatmapData = () => api.get('/documents/heatmap/');
+
+export const fetchDocumentTypes = () => {
+  return api.get('/documents/types/');
+};
+
+
 export default api;
