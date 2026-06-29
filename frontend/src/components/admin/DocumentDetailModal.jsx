@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchDocumentDetail, transitionDocument } from '../../api/axios';
+import { fetchDocumentDetail, transitionDocument, exportDocumentExcel } from '../../api/axios';
 import { useToast } from '../../context/ToastContext';
 import DocumentStatusBadge from './DocumentStatusBadge';
 
@@ -55,11 +55,26 @@ export default function DocumentDetailModal({ documentId, onClose, onUpdated }) 
           <p className="text-slate-400 text-center py-10">Loading…</p>
         ) : (
           <>
-            <div className="mt-4">
-              <p className="font-mono text-sm text-blue-600">{doc.tracking_number}</p>
-              <p className="font-semibold text-slate-900 text-lg mt-1">{doc.document_type_name}</p>
-              {doc.description && <p className="text-sm text-slate-500 mt-1">{doc.description}</p>}
-              <div className="mt-2"><DocumentStatusBadge doc={doc} /></div>
+            <div className="mt-6 flex items-center justify-between bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-mono text-[11px] font-black text-blue-600 tracking-tighter uppercase">{doc.tracking_number}</p>
+                  <DocumentStatusBadge doc={doc} />
+                </div>
+                <h3 className="font-black text-slate-900 text-xl mt-1 leading-tight">{doc.document_type_name}</h3>
+                {doc.description && <p className="text-xs text-slate-500 mt-1 italic">"{doc.description}"</p>}
+              </div>
+
+              {/* Ito yung bagong button from step 2 */}
+              <button
+                onClick={() => exportDocumentExcel(doc.id, doc.tracking_number)}
+                className="group flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-[10px] font-black shadow-xl shadow-emerald-100 transition-all active:scale-95 shrink-0"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>DOWNLOAD EXCEL</span>
+              </button>
             </div>
 
             <div className="mt-5 space-y-2 text-sm">

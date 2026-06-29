@@ -2,16 +2,37 @@ Django_document_tracking/
 ├── backend/
 │   ├── db.sqlite3
 │   ├── manage.py
+│   ├── package.json
 │   ├── requirements.txt
 │   ├── apps/
 │   │   ├── __init__.py
-│   │   └── accounts/
+│   │   ├── accounts/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── migrations/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── 0001_initial.py
+│   │   │   │   └── 0002_user_office_user_position.py
+│   │   │   ├── models.py
+│   │   │   ├── permissions.py
+│   │   │   ├── serializers.py
+│   │   │   ├── tests.py
+│   │   │   ├── urls.py
+│   │   │   └── views.py
+│   │   └── documents/
 │   │       ├── __init__.py
 │   │       ├── admin.py
 │   │       ├── apps.py
+│   │       ├── migrations/
+│   │       │   ├── __init__.py
+│   │       │   ├── 0001_initial.py
+│   │       │   ├── 0002_documentlog_duration_at_office.py
+│   │       │   └── 0003_document_origin_office.py
 │   │       ├── models.py
 │   │       ├── permissions.py
 │   │       ├── serializers.py
+│   │       ├── services.py
 │   │       ├── tests.py
 │   │       ├── urls.py
 │   │       └── views.py
@@ -40,21 +61,38 @@ Django_document_tracking/
 │       │   ├── ConfirmModal.jsx
 │       │   ├── DashboardLayout.jsx
 │       │   ├── ProtectedRoute.jsx
+│       │   ├── Icons.jsx
 │       │   ├── admin/
 │       │   │   ├── AddEmployeeModal.jsx
+│       │   │   ├── DocumentDetailModal.jsx
+│       │   │   ├── DocumentStatusBadge.jsx
+│       │   │   ├── NewDocumentModal.jsx
 │       │   │   └── OfficialDetailsModal.jsx
-│       │   └── auth/
-│       │       ├── LoginForm.jsx
-│       │       └── RegisterForm.jsx
+│       │   ├── auth/
+│       │   │   ├── LoginForm.jsx
+│       │   │   └── RegisterForm.jsx
+│       │   └── employee/
+│       │       ├── DocumentTypePicker.jsx
+│       │       └── NewRequestModal.jsx
 │       ├── context/
 │       │   ├── AuthContext.jsx
 │       │   └── ToastContext.jsx
 │       └── pages/
 │           ├── Landing.jsx
 │           ├── PlaceholderPage.jsx
-│           └── admin/
-│               ├── Archive.jsx
-│               ├── Officials.jsx
-│               └── Users.jsx
+│           ├── PublicTrack.jsx
+│           ├── admin/
+│           │   ├── AdminDashboard.jsx
+│           │   ├── Archive.jsx
+│           │   ├── DocumentRequest.jsx
+│           │   ├── Heatmap.jsx
+│           │   ├── Officials.jsx
+│           │   ├── QRScan.jsx
+│           │   └── Users.jsx
+│           └── employee/
+│               ├── BusinessPermitWizard.jsx
+│               └── OfficeDocuments.jsx
+├── media/
+│   └── document_qr/
 └── venv/
 

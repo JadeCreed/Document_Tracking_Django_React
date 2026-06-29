@@ -12,6 +12,7 @@ import OfficeDocuments from './pages/employee/OfficeDocuments';
 import PublicTrack from './pages/PublicTrack';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Heatmap from './pages/admin/Heatmap';
+import DocumentTypes from './pages/admin/DocumentTypes';
 
 
 function App() {
@@ -26,6 +27,8 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/heatmap" element={<Heatmap />} /> 
+
+          <Route path="/admin/document-types" element={<DocumentTypes />} />
           
           <Route path="/admin/document-request" element={<DocumentRequest />} />
           <Route path="/admin/users" element={<Users />} />

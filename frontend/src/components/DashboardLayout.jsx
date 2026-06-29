@@ -21,7 +21,8 @@ const MENUS = {
   admin: [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutGridIcon },
     { label: 'Heatmap', path: '/admin/heatmap', icon: BarChart3Icon },
-    { label: 'Document Request', path: '/admin/document-request', icon: FileTextIcon },
+    { label: 'Document Management', path: '/admin/document-types', icon: SettingsIcon },
+    { label: 'Workflow Monitoring', path: '/admin/document-request', icon: FileTextIcon },
     {
       label: 'User Management', icon: UsersIcon,
       children: [

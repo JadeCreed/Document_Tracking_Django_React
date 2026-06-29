@@ -11,6 +11,8 @@ from .serializers import (
 from .permissions import IsStaffUser
 from apps.accounts.permissions import IsAdmin
 from .services import process_scan, release_to_citizen, flag_missing
+from .exports import export_document_as_xlsx
+
 from rest_framework.permissions import AllowAny
 
 from django.db.models import Count, Avg
@@ -42,13 +44,12 @@ class DocumentListCreateView(generics.ListCreateAPIView):
     pagination_class = DocumentPagination
 
     def get_queryset(self):
+    # Ibalik lang ang lahat ng documents, ang frontend na ang bahala sa office filtering
+    # para maiwasan ang crash sa pagination.
         qs = Document.objects.all().order_by('-created_at')
         status_param = self.request.query_params.get('status')
         if status_param:
             qs = qs.filter(status=status_param)
-        office_param = self.request.query_params.get('office')
-        if office_param:
-            qs = qs.filter(current_office=office_param)
         return qs
 
     def get_serializer_class(self):
@@ -195,3 +196,23 @@ class HeatmapDataView(APIView):
             })
 
         return Response(formatted_stats)
+    
+class DocumentExportView(APIView):
+    """
+    GET /api/documents/<id>/export/
+    Downloads the document as a filled-in .xlsx matching its physical
+    form template, with the QR code embedded at the top for printing.
+    """
+    permission_classes = [IsStaffUser]
+
+    def get(self, request, pk):
+        try:
+            document = Document.objects.get(pk=pk)
+        except Document.DoesNotExist:
+            return Response({"detail": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
+        return export_document_as_xlsx(document)
+    
+class DocumentTypeCreateView(generics.CreateAPIView):
+    queryset = DocumentType.objects.all()
+    serializer_class = DocumentTypeSerializer
+    permission_classes = [IsAdmin]

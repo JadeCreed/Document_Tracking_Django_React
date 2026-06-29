@@ -35,6 +35,17 @@ body {
   animation: modal-pop-in 0.18s ease-out;
 }
 
+@keyframes slide-in-right {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slide-in-left {
+  from { transform: translateX(-24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.slide-in-right { animation: slide-in-right 0.22s ease-out; }
+.slide-in-left { animation: slide-in-left 0.22s ease-out; }
+
 @keyframes overlay-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -101,4 +112,14 @@ body {
   margin-bottom: 10px !important;
   font-size: 14px !important;
   color: #1e293b !important;
+}
+
+
+@keyframes bounce-short {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce-short {
+  animation: bounce-short 2s ease-in-out infinite;
 }
