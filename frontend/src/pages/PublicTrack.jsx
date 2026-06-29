@@ -2,13 +2,41 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import DocumentStatusBadge from '../components/admin/DocumentStatusBadge';
-import { CheckCircle2Icon, Clock4Icon, HandshakeIcon, MapPinIcon } from '../components/Icons';
+
+
+import { useAuth } from '../context/AuthContext'; 
+import { useToast } from '../context/ToastContext';
+import { 
+  Clock4Icon, 
+  MapPinIcon, 
+  CheckCircle2Icon, 
+  HandshakeIcon 
+} from '../components/Icons';
 
 export default function PublicTrack() {
   const { trackingNumber } = useParams();
   const navigate = useNavigate();
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  const { user } = useAuth(); 
+  const { showToast } = useToast();
+
+
+  const handleClaim = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    try {
+      await api.patch(`/documents/track/${trackingNumber}/claim/`);
+      showToast("Document successfully linked to your account!", "success");
+      window.location.reload();
+    } catch (err) {
+      showToast(err.response?.data?.detail || "Error linking document", "error");
+    }
+  };
+
 
   useEffect(() => {
     // We use the tracking number from the URL
@@ -129,16 +157,58 @@ export default function PublicTrack() {
               ))}
            </div>
 
-           {/* Login Redirect */}
+           {/* Login/Claim Redirect - IMPROVED LOGIC */}
            <div className="mt-12 pt-8 border-t border-slate-100 text-center">
-              <p className="text-sm text-slate-500 mb-4 font-medium">Want to save this to your account and get alerts?</p>
-              <button 
-                onClick={() => navigate('/login')}
-                className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-black transition-all"
-              >
-                Log In / Register
-              </button>
+              {!user ? (
+                // STATE 1: HINDI NAKA-LOGIN
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-500 font-medium tracking-tight">
+                    {doc.requested_by ? "This document is already linked." : "Want to save this to your account and get real-time alerts?"}
+                  </p>
+                  <button 
+                    onClick={() => {
+                      if (!doc.requested_by) localStorage.setItem('pending_claim', trackingNumber);
+                      navigate('/login');
+                    }}
+                    className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-black transition-all shadow-xl shadow-slate-200 uppercase text-xs tracking-widest"
+                  >
+                    {doc.requested_by ? 'Login to Dashboard' : 'Login and Save Document'}
+                  </button>
+                </div>
+              ) : (Number(doc.requested_by) === Number(user.id)) ? (
+                // STATE 2: NAKA-LOGIN AT IKAW ANG OWNER (Number conversion added for safety)
+                <div className="bg-green-50 py-6 px-6 rounded-[2rem] border-2 border-green-100 modal-pop-in">
+                  <p className="text-green-700 text-xs font-black uppercase tracking-widest mb-3 flex items-center justify-center gap-2">
+                     <CheckCircle2Icon className="w-4 h-4" /> This document is in your dashboard
+                  </p>
+                  <button 
+                    onClick={() => navigate('/citizen/home')}
+                    className="w-full bg-green-600 text-white font-black py-3 rounded-xl hover:bg-green-700 transition-all text-xs uppercase"
+                  >
+                    Go to my Dashboard
+                  </button>
+                </div>
+              ) : !doc.requested_by ? (
+                // STATE 3: NAKA-LOGIN PERO WALANG OWNER
+                <button 
+                  onClick={handleClaim}
+                  className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-100 transition-all uppercase text-xs tracking-widest animate-pulse"
+                >
+                  Link to my Account
+                </button>
+              ) : (
+                // STATE 4: NAKA-LOGIN PERO IBA ANG OWNER
+                <div className="bg-slate-50 py-4 px-6 rounded-2xl border border-slate-200 opacity-60">
+                   <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                     <CheckCircle2Icon className="w-3 h-3" /> This document is linked to an account
+                   </p>
+                   <p className="text-xs text-slate-500 mt-1 font-bold italic">Authorized: {doc.requested_by_name}</p>
+                </div>
+              )}
            </div>
+
+
+
         </div>
       </div>
     </div>

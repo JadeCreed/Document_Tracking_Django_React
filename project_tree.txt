@@ -72,6 +72,7 @@ Django_document_tracking/
 │       │   │   ├── LoginForm.jsx
 │       │   │   └── RegisterForm.jsx
 │       │   └── employee/
+│       │       ├── BusinessPermitWizard.jsx
 │       │       ├── DocumentTypePicker.jsx
 │       │       └── NewRequestModal.jsx
 │       ├── context/
@@ -89,9 +90,10 @@ Django_document_tracking/
 │           │   ├── Officials.jsx
 │           │   ├── QRScan.jsx
 │           │   └── Users.jsx
+│           ├── citizen/
+│           │   └── CitizenHome.jsx
 │           └── employee/
-│               ├── BusinessPermitWizard.jsx
-│               └── OfficeDocuments.jsx
+│               ├── OfficeDocuments.jsx
 ├── media/
 │   └── document_qr/
 └── venv/

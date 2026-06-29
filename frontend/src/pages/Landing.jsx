@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios'; 
+
+
 import {
   ArrowRightLeftIcon,
   BarChart3Icon,
@@ -126,21 +129,45 @@ function LoginForm({ onSwitch }) {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // DITO ANG FIX: Dapat nakabalot ang logic sa loob ng 'handleSubmit' function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
     try {
+      // 1. Gawin ang normal na login
       const user = await login(form.email, form.password);
+      
+      // 2. I-process ang 'pending_claim' kung galing ang user sa Public Tracking scan
+      const pendingClaim = localStorage.getItem('pending_claim');
+      
+      if (pendingClaim && user.role === 'citizen') {
+        try {
+          // I-link ang document sa bagong login na account
+          await api.patch(`/documents/track/${pendingClaim}/claim/`);
+          
+          // Burahin na sa memory para hindi ma-duplicate sa susunod na login
+          localStorage.removeItem('pending_claim');
+          console.log("Document automatically linked!");
+        } catch (claimErr) {
+          // Silent error para hindi ma-block ang login process
+          console.error("Auto-claim failed:", claimErr);
+        }
+      }
+
+      // 3. I-proceed ang redirect base sa role
       if (user.role === 'admin') navigate('/admin/dashboard');
       else if (user.role === 'employee') navigate('/employee/dashboard');
       else navigate('/citizen/home');
+
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit}>
@@ -200,8 +227,7 @@ function LoginForm({ onSwitch }) {
     </form>
   );
 }
-
-function RegisterForm({ onSwitch }) {
+function RegisterForm({ onSwitch }) { 
   const { register } = useAuth();
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '', password: '', confirm_password: '',

@@ -74,9 +74,11 @@ export const updateUser = (userId, data) => {
 
 // --- Document API calls ---
 
-export const fetchDocuments = (statusFilter = '', page = 1) => {
+export const fetchDocuments = (statusFilter = '', page = 1, view = '', office = '') => {
   const params = new URLSearchParams({ page });
   if (statusFilter) params.append('status', statusFilter);
+  if (view) params.append('view', view);
+  if (office) params.append('office', office);
   return api.get(`/documents/?${params.toString()}`);
 };
 
@@ -116,5 +118,8 @@ export const exportDocumentExcel = async (documentId, trackingNumber) => {
   link.remove();
   window.URL.revokeObjectURL(url);
 };
+
+
+export const fetchMyDocuments = () => api.get('/documents/my-requests/');
 
 export default api;

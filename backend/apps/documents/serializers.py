@@ -3,6 +3,8 @@ import qrcode
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from .models import DocumentType, Document, DocumentLog
+from django.db.models import Q
+
 
 class ActorSerializer(serializers.Serializer):
     """
@@ -102,6 +104,21 @@ class CreateDocumentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context['request']
+        form_data = validated_data.get('form_data', {})
+        
+        # 1. Kunin ang credentials mula sa encoded form
+        citizen_email = form_data.get('owner_email') or form_data.get('business_email')
+        
+        # 2. Strict Matching: Email lang muna ang gamitin para iwas error
+        found_user = None
+        from apps.accounts.models import User
+        if citizen_email:
+            found_user = User.objects.filter(email__iexact=citizen_email, role='citizen').first()
+
+        # 3. I-link ang user
+        if found_user:
+            validated_data['requested_by'] = found_user
+
         document = Document.objects.create(
             **validated_data,
             origin_office=request.user.office, 
@@ -109,15 +126,19 @@ class CreateDocumentSerializer(serializers.ModelSerializer):
             route_position=0,
             current_handler=request.user,
         )
+        
+        # 4. Logs
         DocumentLog.objects.create(
             document=document,
             action=DocumentLog.Action.CREATED,
             office=document.current_office,
             acted_by=request.user,
-            notes='Document created and entered into workflow.',
+            notes=f"Linked to account: {found_user.email}" if found_user else "Unregistered walk-in application.",
         )
         self._generate_qr_code(document)
         return document
+    
+    
 
     def _generate_qr_code(self, document):
         # Change this to your frontend URL

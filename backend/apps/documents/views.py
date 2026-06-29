@@ -13,7 +13,7 @@ from apps.accounts.permissions import IsAdmin
 from .services import process_scan, release_to_citizen, flag_missing
 from .exports import export_document_as_xlsx
 
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from django.db.models import Count, Avg
 from datetime import timedelta
@@ -39,17 +39,45 @@ class DocumentListCreateView(generics.ListCreateAPIView):
     """
     GET  /api/documents/           list all documents (staff only)
     POST /api/documents/           create a new document (first office logs the request)
+
+    Supports ?view=my-requests|to-scan|released&office=BPLO for employees,
+    so filtering happens BEFORE pagination, not after. This is critical
+    once document volume grows — page 1 of unfiltered results would
+    otherwise miss real matches sitting on page 2+.
     """
     permission_classes = [IsStaffUser]
     pagination_class = DocumentPagination
 
     def get_queryset(self):
-    # Ibalik lang ang lahat ng documents, ang frontend na ang bahala sa office filtering
-    # para maiwasan ang crash sa pagination.
         qs = Document.objects.all().order_by('-created_at')
+
         status_param = self.request.query_params.get('status')
         if status_param:
             qs = qs.filter(status=status_param)
+
+        view_param = self.request.query_params.get('view')
+        office_param = self.request.query_params.get('office')
+
+        if view_param and office_param:
+            office_upper = office_param.upper()
+            if view_param == 'my-requests':
+                qs = qs.filter(origin_office__iexact=office_upper).exclude(status='released')
+            elif view_param == 'released':
+                qs = qs.filter(origin_office__iexact=office_upper, status='released')
+            elif view_param == 'to-scan':
+                # current_office is a computed property, not a DB column —
+                # can't filter in SQL, so we narrow first then filter in
+                # Python. Narrowing to in_progress/missing first keeps this
+                # cheap even as total document volume grows, since we're
+                # only iterating active documents, not the full history.
+                candidates = qs.filter(status__in=['in_progress', 'missing'])
+                matching_ids = [
+                    d.id for d in candidates
+                    if d.route[d.route_position + 1].upper() == office_upper
+                    if d.route_position + 1 < len(d.route)
+                ]
+                qs = qs.filter(id__in=matching_ids)
+
         return qs
 
     def get_serializer_class(self):
@@ -62,6 +90,7 @@ class DocumentListCreateView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         document = serializer.save()
         return Response(DocumentDetailSerializer(document).data, status=status.HTTP_201_CREATED)
+
 
 
 class DocumentDetailView(generics.RetrieveAPIView):
@@ -119,11 +148,15 @@ class DocumentReleaseView(APIView):
     Called by the origin office once a Completed document is physically
     handed back to the citizen.
     """
-    permission_classes = [IsStaffUser]
+    permission_classes = [IsAuthenticated] 
 
     def patch(self, request, pk):
         try:
-            document = Document.objects.get(pk=pk)
+            # Tinitiyak na ang nag-click ay Staff OR ang mismong Citizen na nag-request
+            from django.db.models import Q
+            document = Document.objects.get(
+                Q(pk=pk) & (Q(requested_by=request.user) | Q(current_handler__role__in=['admin', 'employee']))
+            )
         except Document.DoesNotExist:
             return Response({"detail": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -216,3 +249,50 @@ class DocumentTypeCreateView(generics.CreateAPIView):
     queryset = DocumentType.objects.all()
     serializer_class = DocumentTypeSerializer
     permission_classes = [IsAdmin]
+
+
+
+class ClaimDocumentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, tracking_number):
+        try:
+            # Hanapin ang document gamit ang tracking number
+            document = Document.objects.get(tracking_number=tracking_number)
+            
+            # Check kung may nag-claim na
+            if document.requested_by:
+                return Response({"detail": "This document is already linked to an account."}, status=400)
+            
+            # I-link ang document sa naka-login na user
+            document.requested_by = request.user
+            document.save()
+            
+            return Response(DocumentSerializer(document).data)
+        except Document.DoesNotExist:
+            return Response({"detail": "Document not found."}, status=404)
+        
+
+class MyDocumentsView(generics.ListAPIView):
+    serializer_class = DocumentDetailSerializer 
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Ibalik lang ang documents kung saan ang requested_by ay ang current user
+        return Document.objects.filter(requested_by=self.request.user).order_by('-updated_at')
+    
+
+class DocumentReturnView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            document = Document.objects.get(pk=pk, requested_by=request.user)
+            notes = request.data.get('notes', 'No notes provided.')
+            
+            from .services import return_to_origin
+            updated = return_to_origin(document, request.user, notes)
+            
+            return Response(DocumentDetailSerializer(updated).data)
+        except Document.DoesNotExist:
+            return Response({"detail": "Document not found or not owned by you."}, status=404)

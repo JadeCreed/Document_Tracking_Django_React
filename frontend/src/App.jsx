@@ -13,7 +13,7 @@ import PublicTrack from './pages/PublicTrack';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Heatmap from './pages/admin/Heatmap';
 import DocumentTypes from './pages/admin/DocumentTypes';
-
+import CitizenHome from './pages/citizen/CitizenHome';
 
 function App() {
   return (
@@ -50,8 +50,8 @@ function App() {
       {/* CITIZEN */}
       <Route element={<ProtectedRoute allowedRoles={['citizen']} />}>
         <Route element={<DashboardLayout />}>
-          <Route path="/citizen/home" element={<PlaceholderPage title="Home" />} />
-          <Route path="/citizen/history" element={<PlaceholderPage title="History" />} />
+          <Route path="/citizen/home" element={<CitizenHome />} />
+          <Route path="/citizen/history" element={<CitizenHome />} />
         </Route>
       </Route>
     </Routes>

@@ -3,7 +3,7 @@ import { fetchUsers, toggleUserActive } from '../../api/axios';
 import AddEmployeeModal from '../../components/admin/AddEmployeeModal';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useToast } from '../../context/ToastContext';
-
+import UserDetailsModal from '../../components/admin/UserDetailsModal';
 
 export default function Users() {
   const [roleTab, setRoleTab] = useState('citizen'); // 'citizen' | 'employee'
@@ -13,6 +13,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState(null); // user pending deactivation
+  const [viewTarget, setViewTarget] = useState(null);  
   const { showToast } = useToast();
   const [search, setSearch] = useState('');
 
@@ -112,14 +113,15 @@ const handleConfirmDeactivate = async () => {
               {roleTab === 'employee' && <th className="text-left px-5 py-3">Office</th>}
               {roleTab === 'employee' && <th className="text-left px-5 py-3">Position</th>}
               <th className="text-left px-5 py-3">Status</th>
+              <th className="text-left px-5 py-3">View</th>
               <th className="text-left px-5 py-3">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading ? (
-              <tr><td colSpan="7" className="text-center py-8 text-slate-400">Loading…</td></tr>
+              <tr><td colSpan="8" className="text-center py-8 text-slate-400">Loading…</td></tr>
             ) : filteredUsers.length === 0 ? (
-              <tr><td colSpan="7" className="text-center py-8 text-slate-400">No users found.</td></tr>
+              <tr><td colSpan="8" className="text-center py-8 text-slate-400">No users found.</td></tr>
             ) : (
               filteredUsers.map((u) => (
                 <tr key={u.id}>
@@ -136,6 +138,14 @@ const handleConfirmDeactivate = async () => {
                     <span className={`text-xs font-medium ${u.is_active ? 'text-green-600' : 'text-slate-400'}`}>
                       ● {u.is_active ? 'Active' : 'Inactive'}
                     </span>
+                  </td>
+                  <td className="px-5 py-3">
+                    <button
+                      onClick={() => setViewTarget(u)}
+                      className="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg px-3 py-1.5 transition-colors"
+                    >
+                      View
+                    </button>
                   </td>
                   <td className="px-5 py-3">
                     <button
@@ -185,6 +195,14 @@ const handleConfirmDeactivate = async () => {
           }}
         />
       )}
+
+      {viewTarget && (
+        <UserDetailsModal
+          user={viewTarget}
+          onClose={() => setViewTarget(null)}
+        />
+      )}
+      
       {confirmTarget && (
       <ConfirmModal
         title="Deactivate user?"

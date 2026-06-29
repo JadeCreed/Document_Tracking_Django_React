@@ -94,3 +94,28 @@ def flag_missing(document, flagging_user, notes=''):
         notes=notes,
     )
     return document
+
+
+def return_to_origin(document, returning_user, notes=''):
+    """
+    Ibinabalik ang document sa pinagmulan (route_position 0)
+    kapag may nakitang mali ang citizen o kailangan ng follow-up.
+    """
+    if document.status == Document.Status.RELEASED:
+        raise ValidationError("Cannot return a document that has already been finalized/released.")
+
+    # I-reset sa step 0 (BPLO)
+    document.route_position = 0
+    document.status = Document.Status.IN_PROGRESS
+    document.current_handler = None # Tanggalin ang current handler para ma-scan ulit ng BPLO
+    document.entered_current_office_at = timezone.now()
+    document.save()
+
+    DocumentLog.objects.create(
+        document=document,
+        action=DocumentLog.Action.FLAGGED_MISSING, # Pwede nating gamitin ito o gumawa ng bagong Action
+        office=document.origin_office,
+        acted_by=returning_user,
+        notes=f"CITIZEN RETURNED: {notes}",
+    )
+    return document

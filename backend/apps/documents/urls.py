@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     DocumentListCreateView, DocumentDetailView,
     DocumentScanView, DocumentReleaseView, DocumentFlagMissingView,
-    DocumentTrackingLookupView, DocumentTypeListView,AdminDashboardStatsView, HeatmapDataView,DocumentExportView,DocumentTypeCreateView
+    DocumentTrackingLookupView, DocumentTypeListView,AdminDashboardStatsView, HeatmapDataView,DocumentExportView,DocumentTypeCreateView,
+    ClaimDocumentView,MyDocumentsView,DocumentReturnView 
 )
 
 urlpatterns = [
@@ -21,5 +22,10 @@ urlpatterns = [
     path('heatmap/', HeatmapDataView.as_view(), name='heatmap-data'),
 
     path('types/create/', DocumentTypeCreateView.as_view(), name='document-type-create'),
+
+    path('track/<str:tracking_number>/claim/', ClaimDocumentView.as_view(), name='document-claim'),
     
+    path('my-requests/', MyDocumentsView.as_view(), name='my-documents'),
+
+    path('<int:pk>/return/', DocumentReturnView.as_view(), name='document-return'),
 ]
